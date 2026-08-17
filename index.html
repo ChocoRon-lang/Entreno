@@ -143,6 +143,73 @@
   .version-badge.current .version-dot { background: #3FC373; }
   .version-badge.outdated { color: #F5A623; cursor: pointer; opacity: 1; }
   .version-badge.outdated .version-dot { background: #F5A623; }
+
+  /* ---- Programas / Juggernaut ---- */
+  .wave-week-row { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .wave-badge, .week-badge { font-size: 12.5px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+  .wave-badge { background: var(--accent-soft); color: var(--accent-strong); }
+  .week-badge { background: var(--field-bg); color: var(--ink-soft); border: 1px solid var(--hairline); }
+  .wave-nav { display: flex; gap: 8px; margin-top: 12px; }
+
+  .lift-item {
+    background: var(--card); border: 1px solid var(--hairline); border-radius: 13px;
+    padding: 13px 14px; margin-bottom: 8px; cursor: pointer;
+  }
+  .lift-item-top { display: flex; align-items: center; justify-content: space-between; }
+  .lift-item-name { font-size: 15px; font-weight: 650; }
+  .lift-item-done { color: #3FC373; font-size: 12px; font-weight: 700; }
+
+  .setup-lift-row {
+    background: var(--field-bg); border: 1px solid var(--hairline); border-radius: 12px;
+    padding: 10px 12px; margin-bottom: 8px;
+  }
+  .setup-lift-top { display: flex; align-items: center; gap: 8px; }
+  .setup-lift-name { flex: 1; font-size: 13.5px; font-weight: 650; }
+  .setup-lift-top input {
+    width: 64px; border: 1px solid var(--hairline); background: var(--card);
+    border-radius: 8px; padding: 7px 6px; font-size: 13px; text-align: center; color: var(--ink);
+  }
+  .setup-lift-preview { font-size: 11px; color: var(--accent-strong); margin-top: 6px; font-weight: 600; }
+
+  .set-table-header {
+    display: grid; grid-template-columns: 56px 1fr 1fr 40px; gap: 6px;
+    padding: 0 4px 6px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--ink-soft);
+  }
+  .set-table-header span:nth-child(2), .set-table-header span:nth-child(3) { text-align: center; }
+  .set-row {
+    display: grid; grid-template-columns: 56px 1fr 1fr 40px; gap: 6px; align-items: center;
+    padding: 9px 4px; border-radius: 10px;
+  }
+  .set-row:nth-child(even) { background: var(--field-bg); }
+  .set-row.amrap { background: var(--accent-soft); }
+  .set-row.approx { opacity: 0.7; }
+  .set-row-num { font-size: 13.5px; font-weight: 700; }
+  .set-row.amrap .set-row-num { color: var(--accent-strong); }
+  .set-row-target { font-size: 9.5px; color: var(--ink-soft); margin-top: 1px; }
+  .set-row input {
+    width: 100%; border: 1px solid var(--hairline); background: var(--card);
+    border-radius: 8px; padding: 8px 4px; font-size: 14px; color: var(--ink); text-align: center;
+  }
+  .set-row-check {
+    width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--hairline);
+    background: var(--card); color: transparent; font-size: 13px; justify-self: center;
+  }
+  .set-row-check.checked { background: #3FC373; border-color: #3FC373; color: #fff; }
+
+  .rest-banner {
+    position: fixed; left: 16px; right: 16px; bottom: calc(var(--safe-bottom) + 78px);
+    background: var(--card); border: 1px solid var(--accent); border-radius: 18px;
+    padding: 14px 18px; text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.4); z-index: 12;
+  }
+  .rest-banner-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
+  .rest-banner-time { font-size: 30px; font-weight: 750; color: var(--accent-strong); font-variant-numeric: tabular-nums; margin: 2px 0 8px 0; }
+  .rest-banner button { border: 1px solid var(--hairline); background: var(--field-bg); color: var(--urgent); font-size: 12px; font-weight: 650; padding: 7px 16px; border-radius: 9px; }
+
+  .wave-complete-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--field-bg); border: 1px solid var(--hairline); border-radius: 12px;
+    padding: 11px 13px; margin-bottom: 8px; font-size: 13px;
+  }
 </style>
 </head>
 <body>
@@ -174,14 +241,80 @@
     </div>
   </header>
 
-  <!-- Sección 1: Planillas -->
+  <!-- Sección 1: Programas de entrenamiento -->
   <div id="planillasPage" class="page">
-    <main id="planillasHome">
-      <div class="empty-state">
-        <div class="glyph">📋</div>
-        <p>Todavía no has cargado ninguna planilla.<br/>Pídele a Claude que agregue una (por ahora, Juggernaut).</p>
+
+    <!-- Lista de programas cargados -->
+    <div id="planillasHomeView" class="subview">
+      <main>
+        <ul id="programsList"></ul>
+      </main>
+    </div>
+
+    <!-- Carga inicial de Juggernaut (test de 1RM) -->
+    <div id="juggernautSetupView" class="subview" style="display:none;">
+      <div class="toolbar">
+        <button class="icon-btn" id="jgSetupBackBtn" aria-label="Volver">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2>Cargar Juggernaut</h2>
       </div>
-    </main>
+      <main>
+        <p style="font-size:13px; color:var(--ink-soft); padding-bottom:10px; line-height:1.5;">Ingresa una serie de prueba de cada levantamiento (peso y repeticiones). Se calcula tu 1RM estimado y tu 1RM de Entrenamiento (90% del 1RM), igual que tu planilla.</p>
+        <div id="jgSetupList"></div>
+        <button class="primary-btn" id="jgSetupConfirmBtn" style="margin-top:8px;">Cargar Juggernaut</button>
+      </main>
+    </div>
+
+    <!-- Resumen de la oleada + los 4 básicos -->
+    <div id="juggernautOverviewView" class="subview" style="display:none;">
+      <div class="toolbar">
+        <button class="icon-btn" id="jgOverviewBackBtn" aria-label="Volver">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2>Juggernaut</h2>
+      </div>
+      <main>
+        <div class="card">
+          <div class="field-label" style="margin-top:0;">Ciclo actual</div>
+          <div class="wave-week-row">
+            <span class="wave-badge" id="waveLabel">—</span>
+            <span class="week-badge" id="weekLabel">—</span>
+          </div>
+          <div class="wave-nav">
+            <button class="ghost-btn" id="prevWeekBtn" style="flex:1;">‹ Anterior</button>
+            <button class="ghost-btn" id="nextWeekBtn" style="flex:1;">Siguiente ›</button>
+          </div>
+          <button class="primary-btn" id="completeWaveBtn" style="margin-top:10px; display:none;">✓ Completar oleada y calcular nuevo 1RM</button>
+        </div>
+        <div class="field-label">Los 4 básicos</div>
+        <ul id="liftList"></ul>
+      </main>
+    </div>
+
+    <!-- Registrar series de un levantamiento -->
+    <div id="liftSessionView" class="subview" style="display:none;">
+      <div class="toolbar">
+        <button class="icon-btn" id="liftSessionBackBtn" aria-label="Volver">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h2 id="liftSessionTitle">—</h2>
+      </div>
+      <main>
+        <p class="list-row-sub" id="liftSessionSub" style="padding:0 0 10px 0;"></p>
+        <div class="set-table-header">
+          <span>SERIE</span><span>KG</span><span>REPS</span><span></span>
+        </div>
+        <div id="liftSetList"></div>
+        <button class="primary-btn" id="finishLiftBtn" style="margin-top:14px;">✓ Guardar sesión</button>
+      </main>
+      <div class="rest-banner" id="restBanner" style="display:none;">
+        <div class="rest-banner-label">Descanso</div>
+        <div class="rest-banner-time" id="restBannerTime">1:30</div>
+        <button id="restSkipBtn">Saltar</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Sección 2: Rutinas libres -->
@@ -197,7 +330,7 @@
   <nav class="bottom-tabs">
     <button class="bottom-tab active" id="navPlanillas" data-page="planillas">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M6 4h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <span>Planillas</span>
+      <span>Programas</span>
     </button>
     <button class="bottom-tab" id="navRutinas" data-page="rutinas">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M6.5 6.5v11M17.5 6.5v11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="3" y="9" width="3" height="6" rx="1" fill="currentColor"/><rect x="18" y="9" width="3" height="6" rx="1" fill="currentColor"/><path d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -310,7 +443,7 @@ function setPage(page){
   rutinasPageEl.style.display = page === 'rutinas' ? 'flex' : 'none';
   navPlanillas.classList.toggle('active', page === 'planillas');
   navRutinas.classList.toggle('active', page === 'rutinas');
-  pageTitleEl.textContent = page === 'planillas' ? 'Planillas' : 'Rutinas';
+  pageTitleEl.textContent = page === 'planillas' ? 'Programas de entrenamiento' : 'Rutinas';
 }
 navPlanillas.addEventListener('click', () => setPage('planillas'));
 navRutinas.addEventListener('click', () => setPage('rutinas'));
@@ -348,8 +481,62 @@ async function load(){
   renderRutinasHome();
 }
 
+const planillasHomeViewEl = document.getElementById('planillasHomeView');
+const programsListEl = document.getElementById('programsList');
+
+const juggernautSetupViewEl = document.getElementById('juggernautSetupView');
+const jgSetupBackBtn = document.getElementById('jgSetupBackBtn');
+const jgSetupListEl = document.getElementById('jgSetupList');
+const jgSetupConfirmBtn = document.getElementById('jgSetupConfirmBtn');
+
+const juggernautOverviewViewEl = document.getElementById('juggernautOverviewView');
+const jgOverviewBackBtn = document.getElementById('jgOverviewBackBtn');
+const waveLabelEl = document.getElementById('waveLabel');
+const weekLabelEl = document.getElementById('weekLabel');
+const prevWeekBtn = document.getElementById('prevWeekBtn');
+const nextWeekBtn = document.getElementById('nextWeekBtn');
+const completeWaveBtn = document.getElementById('completeWaveBtn');
+const liftListEl = document.getElementById('liftList');
+
+const liftSessionViewEl = document.getElementById('liftSessionView');
+const liftSessionBackBtn = document.getElementById('liftSessionBackBtn');
+const liftSessionTitleEl = document.getElementById('liftSessionTitle');
+const liftSessionSubEl = document.getElementById('liftSessionSub');
+const liftSetListEl = document.getElementById('liftSetList');
+const finishLiftBtn = document.getElementById('finishLiftBtn');
+
+const restBannerEl = document.getElementById('restBanner');
+const restBannerTimeEl = document.getElementById('restBannerTime');
+const restSkipBtn = document.getElementById('restSkipBtn');
+
 function renderPlanillasHome(){
-  // Se construye en el siguiente paso (motor Juggernaut).
+  showPlanillasSubview('planillasHomeView');
+  if (planillas.juggernaut) {
+    const jg = planillas.juggernaut;
+    programsListEl.innerHTML = `
+      <li class="list-row" data-open-program="juggernaut">
+        <div class="list-row-info">
+          <div class="list-row-name">Juggernaut</div>
+          <div class="list-row-sub">${WAVE_LABEL[jg.currentWave]} · ${WEEK_LABEL[jg.currentWeek]}</div>
+        </div>
+        <span class="list-row-chevron">›</span>
+      </li>`;
+    programsListEl.querySelectorAll('[data-open-program]').forEach(el => {
+      el.addEventListener('click', () => openJuggernautOverview());
+    });
+  } else {
+    programsListEl.innerHTML = `
+      <li class="list-row" data-load-program="juggernaut">
+        <div class="list-row-info">
+          <div class="list-row-name">+ Cargar Juggernaut</div>
+          <div class="list-row-sub">Aún no configurado — toca para ingresar tu 1RM inicial</div>
+        </div>
+        <span class="list-row-chevron">›</span>
+      </li>`;
+    programsListEl.querySelectorAll('[data-load-program]').forEach(el => {
+      el.addEventListener('click', () => openJuggernautSetup());
+    });
+  }
 }
 function renderRutinasHome(){
   // Se construye en el siguiente paso (rutinas libres).
@@ -363,6 +550,392 @@ function resetLocalState(){
   currentPage = 'planillas';
   setPage('planillas');
 }
+
+// ============================================================
+// Juggernaut — motor de cálculo (fórmulas verificadas contra la planilla real)
+// ============================================================
+const LIFT_NAMES = ['Press de Banca', 'Sentadilla', 'Press Militar', 'Peso Muerto'];
+const WAVE_ORDER = ['oleada10', 'oleada8', 'oleada5', 'oleada3'];
+const WAVE_NUMBER = { oleada10: 10, oleada8: 8, oleada5: 5, oleada3: 3 };
+const WAVE_LABEL = { oleada10: 'Oleada de 10 Reps', oleada8: 'Oleada de 8 Reps', oleada5: 'Oleada de 5 Reps', oleada3: 'Oleada de 3 Reps' };
+const WEEK_ORDER = ['acumulacion', 'transformacion', 'realizacion', 'descarga'];
+const WEEK_LABEL = { acumulacion: 'Acumulación', transformacion: 'Transformación', realizacion: 'Realización', descarga: 'Descarga' };
+
+const WAVE_TABLES = {
+  oleada10: {
+    acumulacion:   [{pct:60,reps:10},{pct:60,reps:10},{pct:60,reps:10},{pct:60,reps:10},{pct:60,reps:10,amrap:true}],
+    transformacion:[{pct:55,reps:5},{pct:65.5,reps:5},{pct:67.5,reps:10},{pct:67.5,reps:10},{pct:67.5,reps:10,amrap:true}],
+    realizacion:   [{pct:50,reps:5},{pct:60,reps:3},{pct:70,reps:1},{pct:75,reps:0,amrap:true}],
+    descarga:      [{pct:40,reps:5},{pct:50,reps:5},{pct:60,reps:5}],
+  },
+  oleada8: {
+    acumulacion:   [{pct:65,reps:8},{pct:65,reps:8},{pct:65,reps:8},{pct:65,reps:8},{pct:65,reps:0,amrap:true}],
+    transformacion:[{pct:60,reps:3},{pct:67.5,reps:3},{pct:72.5,reps:8},{pct:72.5,reps:8},{pct:72.5,reps:0,amrap:true}],
+    realizacion:   [{pct:50,reps:5},{pct:60,reps:3},{pct:70,reps:2},{pct:75,reps:1},{pct:80,reps:0,amrap:true}],
+    descarga:      [{pct:40,reps:5},{pct:50,reps:5},{pct:60,reps:5}],
+  },
+  oleada5: {
+    acumulacion:   [{pct:70,reps:5},{pct:70,reps:5},{pct:70,reps:5},{pct:70,reps:5},{pct:70,reps:5},{pct:70,reps:0,amrap:true}],
+    transformacion:[{pct:65,reps:2},{pct:72.5,reps:2},{pct:77.5,reps:5},{pct:77.5,reps:5},{pct:77.5,reps:5},{pct:77.5,reps:0,amrap:true}],
+    realizacion:   [{pct:50,reps:5},{pct:60,reps:3},{pct:70,reps:2},{pct:75,reps:1},{pct:80,reps:1},{pct:85,reps:0,amrap:true}],
+    descarga:      [{pct:40,reps:5},{pct:50,reps:5},{pct:60,reps:5}],
+  },
+  oleada3: {
+    acumulacion:   [{pct:75,reps:3},{pct:75,reps:3},{pct:75,reps:3},{pct:75,reps:3},{pct:75,reps:3},{pct:75,reps:3},{pct:75,reps:0,amrap:true}],
+    transformacion:[{pct:70,reps:1},{pct:77.5,reps:1},{pct:82.5,reps:3},{pct:82.5,reps:3},{pct:82.5,reps:3},{pct:82.5,reps:3},{pct:82.5,reps:0,amrap:true}],
+    realizacion:   [{pct:50,reps:5},{pct:60,reps:3},{pct:70,reps:2},{pct:75,reps:1},{pct:80,reps:1},{pct:85,reps:1},{pct:90,reps:0,amrap:true}],
+    descarga:      [{pct:40,reps:5},{pct:50,reps:5},{pct:60,reps:5}],
+  },
+};
+
+function ceilingTo(val, step){ return Math.ceil(val / step) * step; }
+function calcSetWeight(trainingMax, pct){ return ceilingTo(trainingMax * pct / 100, 2.5); }
+function calcEstimated1RM(weight, reps){ return weight * reps * 0.033 + weight; }
+function calcRepsObjetivo(prevEstimated1RM, amrapWeight){
+  return Math.ceil(30 * (prevEstimated1RM / amrapWeight - 1));
+}
+function buildWeekSets(liftName, wave, week){
+  const table = WAVE_TABLES[wave][week];
+  const lift = planillas.juggernaut.lifts[liftName];
+  return table.map(s => {
+    const targetWeight = calcSetWeight(lift.trainingMax, s.pct);
+    const amrap = !!s.amrap;
+    let repsObjetivo = null;
+    if (amrap && lift.lastEstimated1RM) repsObjetivo = calcRepsObjetivo(lift.lastEstimated1RM, targetWeight);
+    return { pct: s.pct, targetWeight, targetReps: s.reps, amrap, repsObjetivo, isApprox: false };
+  });
+}
+function buildApproachSets(workSets){
+  if (!workSets || workSets.length === 0) return [];
+  const topWeight = Math.max(...workSets.map(s => s.targetWeight));
+  const barWeight = 20;
+  const steps = [
+    { targetWeight: barWeight, targetReps: 8 },
+    { targetWeight: Math.max(barWeight, ceilingTo(topWeight * 0.4, 2.5)), targetReps: 5 },
+    { targetWeight: ceilingTo(topWeight * 0.6, 2.5), targetReps: 3 },
+    { targetWeight: ceilingTo(topWeight * 0.8, 2.5), targetReps: 2 },
+  ];
+  return steps.filter((s, i) => i === 0 || s.targetWeight > steps[i - 1].targetWeight)
+    .map(s => ({ pct: null, targetWeight: s.targetWeight, targetReps: s.targetReps, amrap: false, repsObjetivo: null, isApprox: true }));
+}
+
+// ---- Navegación interna de "Programas de entrenamiento" ----
+const PLANILLAS_SUBVIEWS = ['planillasHomeView', 'juggernautSetupView', 'juggernautOverviewView', 'liftSessionView'];
+function showPlanillasSubview(id){
+  PLANILLAS_SUBVIEWS.forEach(vid => {
+    document.getElementById(vid).style.display = (vid === id) ? 'flex' : 'none';
+  });
+}
+
+// ---- Carga inicial (test de 1RM) ----
+function openJuggernautSetup(){
+  jgSetupListEl.innerHTML = LIFT_NAMES.map(name => `
+    <div class="setup-lift-row" data-lift-row="${name}">
+      <div class="setup-lift-top">
+        <span class="setup-lift-name">${name}</span>
+        <input type="number" inputmode="decimal" placeholder="Kg" data-setup-weight="${name}" />
+        <input type="number" inputmode="numeric" placeholder="Reps" data-setup-reps="${name}" />
+      </div>
+      <div class="setup-lift-preview" data-setup-preview="${name}">1RM de Entrenamiento: —</div>
+    </div>`).join('');
+
+  function updatePreview(name){
+    const row = jgSetupListEl.querySelector(`[data-lift-row="${CSS.escape(name)}"]`);
+    const w = parseFloat(row.querySelector('[data-setup-weight]').value);
+    const r = parseInt(row.querySelector('[data-setup-reps]').value, 10);
+    const previewEl = row.querySelector('[data-setup-preview]');
+    if (isFinite(w) && w > 0 && isFinite(r) && r > 0) {
+      const est1RM = calcEstimated1RM(w, r);
+      const tm = ceilingTo(est1RM * 0.9, 2.5);
+      previewEl.textContent = `1RM estimado: ${Math.round(est1RM * 10) / 10}kg · 1RM de Entrenamiento: ${tm}kg`;
+    } else {
+      previewEl.textContent = '1RM de Entrenamiento: —';
+    }
+  }
+  jgSetupListEl.querySelectorAll('[data-setup-weight], [data-setup-reps]').forEach(inp => {
+    inp.addEventListener('input', () => updatePreview(inp.dataset.setupWeight || inp.dataset.setupReps));
+  });
+
+  showPlanillasSubview('juggernautSetupView');
+}
+jgSetupBackBtn.addEventListener('click', () => showPlanillasSubview('planillasHomeView'));
+
+jgSetupConfirmBtn.addEventListener('click', () => {
+  const newLifts = {};
+  let valid = true;
+  LIFT_NAMES.forEach(name => {
+    const row = jgSetupListEl.querySelector(`[data-lift-row="${CSS.escape(name)}"]`);
+    const w = parseFloat(row.querySelector('[data-setup-weight]').value);
+    const r = parseInt(row.querySelector('[data-setup-reps]').value, 10);
+    if (!isFinite(w) || w <= 0 || !isFinite(r) || r <= 0) { valid = false; return; }
+    const est1RM = calcEstimated1RM(w, r);
+    const tm = ceilingTo(est1RM * 0.9, 2.5);
+    newLifts[name] = {
+      trainingMax: tm,
+      incrementPerRep: (name === 'Sentadilla' || name === 'Peso Muerto') ? 2.5 : 1.25,
+      lastEstimated1RM: Math.round(est1RM * 100) / 100,
+      lastAmrapReps: null,
+      restSeconds: (name === 'Sentadilla' || name === 'Peso Muerto') ? 150 : 120,
+    };
+  });
+  if (!valid) return;
+  planillas.juggernaut = {
+    lifts: newLifts,
+    currentWave: 'oleada10',
+    currentWeek: 'acumulacion',
+    trainingLog: [],
+  };
+  scheduleSave();
+  renderPlanillasHome();
+  openJuggernautOverview();
+});
+
+// ---- Resumen de oleada + 4 básicos ----
+function openJuggernautOverview(){
+  renderJuggernautOverview();
+  showPlanillasSubview('juggernautOverviewView');
+}
+jgOverviewBackBtn.addEventListener('click', () => { showPlanillasSubview('planillasHomeView'); renderPlanillasHome(); });
+
+function renderJuggernautOverview(){
+  const jg = planillas.juggernaut;
+  waveLabelEl.textContent = WAVE_LABEL[jg.currentWave];
+  weekLabelEl.textContent = WEEK_LABEL[jg.currentWeek];
+  completeWaveBtn.style.display = jg.currentWeek === 'descarga' ? '' : 'none';
+
+  liftListEl.innerHTML = LIFT_NAMES.map(name => {
+    const done = jg.trainingLog.some(l => l.lift === name && l.wave === jg.currentWave && l.week === jg.currentWeek);
+    return `
+      <li class="lift-item" data-lift="${name}">
+        <div class="lift-item-top">
+          <span class="lift-item-name">${name}</span>
+          ${done ? '<span class="lift-item-done">✓ Hecho</span>' : '<span class="list-row-chevron">›</span>'}
+        </div>
+      </li>`;
+  }).join('');
+  liftListEl.querySelectorAll('.lift-item').forEach(el => {
+    el.addEventListener('click', () => openLiftSession(el.dataset.lift));
+  });
+}
+
+function advanceWeek(dir){
+  const jg = planillas.juggernaut;
+  const idx = WEEK_ORDER.indexOf(jg.currentWeek);
+  const newIdx = idx + dir;
+  const waveIdx = WAVE_ORDER.indexOf(jg.currentWave);
+  if (newIdx < 0) {
+    jg.currentWave = WAVE_ORDER[(waveIdx - 1 + WAVE_ORDER.length) % WAVE_ORDER.length];
+    jg.currentWeek = 'descarga';
+  } else if (newIdx >= WEEK_ORDER.length) {
+    jg.currentWave = WAVE_ORDER[(waveIdx + 1) % WAVE_ORDER.length];
+    jg.currentWeek = 'acumulacion';
+  } else {
+    jg.currentWeek = WEEK_ORDER[newIdx];
+  }
+  scheduleSave();
+  renderJuggernautOverview();
+}
+prevWeekBtn.addEventListener('click', () => advanceWeek(-1));
+nextWeekBtn.addEventListener('click', () => advanceWeek(1));
+
+function findRealizacionLog(name, wave){
+  const jg = planillas.juggernaut;
+  const entries = jg.trainingLog.filter(l => l.lift === name && l.wave === wave && l.week === 'realizacion');
+  if (entries.length === 0) return null;
+  entries.sort((a, b) => b.ts - a.ts);
+  return entries[0];
+}
+
+completeWaveBtn.addEventListener('click', () => {
+  const jg = planillas.juggernaut;
+  const waveNum = WAVE_NUMBER[jg.currentWave];
+  const changes = LIFT_NAMES.map(name => {
+    const lift = jg.lifts[name];
+    let newMax = lift.trainingMax;
+    let amrapReps = null;
+    const log = findRealizacionLog(name, jg.currentWave);
+    if (log) {
+      const amrapSet = log.sets.find(s => s.amrap);
+      if (amrapSet && amrapSet.actualReps != null) amrapReps = amrapSet.actualReps;
+    }
+    if (amrapReps == null && lift.lastAmrapReps != null) amrapReps = lift.lastAmrapReps;
+    if (amrapReps != null) newMax = ceilingTo((amrapReps - waveNum) * lift.incrementPerRep + lift.trainingMax, 2.5);
+    return { name, oldMax: lift.trainingMax, newMax, amrapReps };
+  });
+
+  const summary = changes.map(c => `${c.name}: ${c.oldMax}kg → ${c.newMax}kg (${c.amrapReps != null ? c.amrapReps + ' reps AMRAP' : 'sin AMRAP registrada'})`).join('\n');
+  if (!confirm(`Vas a completar la ${WAVE_LABEL[jg.currentWave]}.\n\n${summary}\n\n¿Confirmar y avanzar?`)) return;
+
+  changes.forEach(c => { jg.lifts[c.name].trainingMax = c.newMax; });
+  const waveIdx = WAVE_ORDER.indexOf(jg.currentWave);
+  jg.currentWave = WAVE_ORDER[(waveIdx + 1) % WAVE_ORDER.length];
+  jg.currentWeek = 'acumulacion';
+  scheduleSave();
+  renderJuggernautOverview();
+});
+
+// ---- Registrar una sesión de un levantamiento ----
+let activeLiftName = null;
+let activeLiftDraftSets = null;
+let restTimerInterval = null;
+let restTimerEndsAt = null;
+
+function openLiftSession(name){
+  const jg = planillas.juggernaut;
+  activeLiftName = name;
+  const existing = jg.trainingLog.find(l => l.lift === name && l.wave === jg.currentWave && l.week === jg.currentWeek);
+  if (existing) {
+    activeLiftDraftSets = existing.sets.map(s => ({
+      pct: s.pct, targetWeight: s.targetWeight, targetReps: s.targetReps, amrap: s.amrap,
+      repsObjetivo: s.repsObjetivo != null ? s.repsObjetivo : null, isApprox: !!s.isApprox,
+      actualWeight: s.actualWeight != null ? s.actualWeight : s.targetWeight,
+      actualReps: s.actualReps != null ? s.actualReps : '',
+      done: true,
+    }));
+  } else {
+    const workSets = buildWeekSets(name, jg.currentWave, jg.currentWeek);
+    const approachSets = buildApproachSets(workSets);
+    activeLiftDraftSets = approachSets.concat(workSets).map(s => Object.assign({}, s, {
+      actualWeight: s.targetWeight,
+      actualReps: s.amrap ? '' : s.targetReps,
+      done: false,
+    }));
+  }
+  liftSessionTitleEl.textContent = name;
+  liftSessionSubEl.textContent = WAVE_LABEL[jg.currentWave] + ' · ' + WEEK_LABEL[jg.currentWeek] + (existing ? ' · ya registrada' : '');
+  showPlanillasSubview('liftSessionView');
+  renderLiftSetList();
+}
+liftSessionBackBtn.addEventListener('click', () => { cancelRestTimer(); showPlanillasSubview('juggernautOverviewView'); });
+
+function renderLiftSetList(){
+  let approxN = 0, serieN = 0;
+  liftSetListEl.innerHTML = activeLiftDraftSets.map((s, i) => {
+    const label = s.isApprox ? ('Aprox ' + (++approxN)) : ('Serie ' + (++serieN) + (s.amrap ? ' 🔥' : ''));
+    return `
+      <div class="set-row ${s.amrap ? 'amrap' : ''} ${s.isApprox ? 'approx' : ''}" data-idx="${i}">
+        <div>
+          <div class="set-row-num">${label}</div>
+          <div class="set-row-target">obj. ${s.amrap ? (s.repsObjetivo ? s.repsObjetivo + '+' : '¿?') : s.targetReps}</div>
+        </div>
+        <input type="number" inputmode="decimal" value="${s.actualWeight}" data-kg-idx="${i}" />
+        <input type="number" inputmode="numeric" placeholder="${s.amrap ? 'AMRAP' : ''}" value="${s.actualReps}" data-reps-idx="${i}" />
+        <button class="set-row-check ${s.done ? 'checked' : ''}" data-check-idx="${i}">✓</button>
+      </div>`;
+  }).join('');
+
+  liftSetListEl.querySelectorAll('input[data-kg-idx]').forEach(inp => {
+    inp.addEventListener('input', () => { activeLiftDraftSets[+inp.dataset.kgIdx].actualWeight = inp.value; });
+  });
+  liftSetListEl.querySelectorAll('input[data-reps-idx]').forEach(inp => {
+    inp.addEventListener('input', () => { activeLiftDraftSets[+inp.dataset.repsIdx].actualReps = inp.value; });
+  });
+  liftSetListEl.querySelectorAll('[data-check-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.checkIdx;
+      const wasDone = activeLiftDraftSets[idx].done;
+      activeLiftDraftSets[idx].done = !wasDone;
+      renderLiftSetList();
+      if (!wasDone && idx < activeLiftDraftSets.length - 1) {
+        startRestTimer(planillas.juggernaut.lifts[activeLiftName].restSeconds);
+      }
+    });
+  });
+}
+
+finishLiftBtn.addEventListener('click', () => {
+  const jg = planillas.juggernaut;
+  const name = activeLiftName;
+  const lift = jg.lifts[name];
+  const amrapSet = activeLiftDraftSets.find(s => s.amrap);
+  let estimated1RM = null;
+
+  if (amrapSet && amrapSet.actualReps) {
+    const reps = parseInt(amrapSet.actualReps, 10);
+    const weight = parseFloat(amrapSet.actualWeight) || amrapSet.targetWeight;
+    if (isFinite(reps) && reps > 0) {
+      estimated1RM = calcEstimated1RM(weight, reps);
+      lift.lastEstimated1RM = Math.round(estimated1RM * 100) / 100;
+      lift.lastAmrapReps = reps;
+    }
+  }
+
+  const entry = {
+    ts: Date.now(), date: new Date().toISOString().slice(0, 10),
+    wave: jg.currentWave, week: jg.currentWeek, lift: name,
+    sets: activeLiftDraftSets.map(s => ({
+      pct: s.pct, targetWeight: s.targetWeight, targetReps: s.targetReps, amrap: s.amrap,
+      repsObjetivo: s.repsObjetivo != null ? s.repsObjetivo : null, isApprox: !!s.isApprox,
+      actualWeight: s.actualWeight ? parseFloat(s.actualWeight) : null,
+      actualReps: s.actualReps ? parseInt(s.actualReps, 10) : null,
+    })),
+    estimated1RM,
+  };
+  const existingIdx = jg.trainingLog.findIndex(l => l.lift === name && l.wave === jg.currentWave && l.week === jg.currentWeek);
+  if (existingIdx !== -1) jg.trainingLog[existingIdx] = Object.assign({ id: jg.trainingLog[existingIdx].id }, entry);
+  else jg.trainingLog.unshift(Object.assign({ id: uid() }, entry));
+
+  scheduleSave();
+  cancelRestTimer();
+  showPlanillasSubview('juggernautOverviewView');
+  renderJuggernautOverview();
+});
+
+// ---- Temporizador de descanso (simple: cuenta regresiva + un pitido) ----
+function formatRest(totalSeconds){
+  totalSeconds = Math.max(0, totalSeconds);
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+let sharedAudioCtx = null;
+function playBeep(){
+  try {
+    if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+    const ctx = sharedAudioCtx;
+    [0, 0.18, 0.36].forEach(t => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + 0.3);
+    });
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  } catch (e) {}
+}
+function startRestTimer(seconds){
+  try {
+    if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+  } catch (e) {}
+  restTimerEndsAt = Date.now() + seconds * 1000;
+  restBannerEl.style.display = 'block';
+  tickRestTimer();
+  clearInterval(restTimerInterval);
+  restTimerInterval = setInterval(tickRestTimer, 250);
+}
+function tickRestTimer(){
+  const remaining = Math.round((restTimerEndsAt - Date.now()) / 1000);
+  if (remaining <= 0) {
+    restBannerTimeEl.textContent = '0:00';
+    clearInterval(restTimerInterval);
+    restTimerInterval = null;
+    playBeep();
+    setTimeout(() => { restBannerEl.style.display = 'none'; }, 900);
+    return;
+  }
+  restBannerTimeEl.textContent = formatRest(remaining);
+}
+function cancelRestTimer(){
+  clearInterval(restTimerInterval);
+  restTimerInterval = null;
+  restBannerEl.style.display = 'none';
+}
+restSkipBtn.addEventListener('click', cancelRestTimer);
 
 // ---- Auth state ----
 onAuthStateChanged(auth, async (user) => {
@@ -380,7 +953,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ---- Version check (mismo patrón que Prisma) ----
-const APP_VERSION = '2026-08-13.1';
+const APP_VERSION = '2026-08-13.2';
 async function checkVersion(){
   try {
     const res = await fetch('version.json?t=' + Date.now());
